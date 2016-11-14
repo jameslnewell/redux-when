@@ -1,7 +1,15 @@
 {
   "name": "redux-when",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Delay dispatching an action until a condition is true.",
+  "keywords": [
+    "redux",
+    "wait",
+    "when",
+    "until",
+    "for",
+    "delay"
+  ],
   "main": "./dist/index.js",
   "devDependencies": {
     "babel-plugin-transform-object-rest-spread": "^6.6.4",
