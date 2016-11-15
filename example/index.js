@@ -1,14 +1,14 @@
-import {createStore} from 'redux';
-import enhancer, {when} from '..';
+import {createStore, applyMiddleware} from 'redux';
+import middleware, {once} from '..';
 
 const reducer = (state = {}, action = {}) => {
   const {type} = action;
   switch (type) {
 
-    case 'save':
+    case 'SAVE':
       return {...state, saved: true};
 
-    case 'navigate':
+    case 'NAVIGATE':
       return {...state, navigated: true};
 
     default:
@@ -18,14 +18,17 @@ const reducer = (state = {}, action = {}) => {
 };
 
 //create the store
-const store = createStore(reducer, {}, enhancer);
+const store = createStore(reducer, {}, applyMiddleware(middleware));
 
-//dispatch the `navigate` action when the state has been saved
-store.dispatch(when(state => state.saved, {type: 'navigate'}));
+//dispatch the `NAVIGATE` action ONCE the state has been saved
+store.dispatch(once(state => state.saved, {type: 'NAVIGATE'}));
 
-console.log(store.getState()); //prints: {}
+//prints: {}
+console.log(store.getState());
 
-//dispatch the `save` action which will update the sate and trigger the `navigate` action
-store.dispatch({type: 'save'});
+//dispatch the `SAVE` action which will update the state and trigger
+// the delayed `NAVIGATE` action
+store.dispatch({type: 'SAVE'});
 
-console.log(store.getState()); //prints: {saved: true, navigated: true}
+//prints: {saved: true, navigated: true}
+console.log(store.getState());
