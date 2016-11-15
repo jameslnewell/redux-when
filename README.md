@@ -89,5 +89,5 @@ Returns a dispatchable Redux action to be handled by the `redux-when` middleware
 
 > Note: You MUST dispatch the created action.
   ```js
-  store.dispatch(once(() => true, {type: 'xyz'}));
+  store.dispatch(when(() => true, {type: 'xyz'}));
   ```

@@ -25,7 +25,7 @@
   "scripts": {
     "build": "babel ./index.js -d ./dist/",
     "watch": "npm run build -- --watch",
-    "example": "babel-node ./example/index.js",
-    "test": "mocha --compilers js:babel-register"
+    "test": "mocha --compilers js:babel-register",
+    "example": "babel-node ./example/index.js"
   }
 }
