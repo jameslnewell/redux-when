@@ -3,7 +3,7 @@
 
 ## 1.0.0
 
-- add: ability to `cancel()` actions
+- add: ability to `cancel()` delayed actions
 - break: using action creators instead of actions
 - break: renamed the `when` action creator to `once` and added a new action creator named `when` which dispatches the action every time the condition evaluates to true
 - break: changed the action name from `@when` to `@redux-when/once`
