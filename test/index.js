@@ -19,14 +19,14 @@ describe('redux-when', () => {
     it('should create a once() action', () => {
 
       const condition = () => false;
-      const action = {type: 'foobar'};
-      const onceAction = once(condition, action);
+      const createAction = () => {type: 'foobar'};
+      const onceAction = once(condition, createAction);
 
       expect(onceAction).to.be.deep.equal({
         type: ONCE,
         payload: {
           condition,
-          action
+          createAction
         }
       });
     });
@@ -38,14 +38,14 @@ describe('redux-when', () => {
     it('should create a when() action', () => {
 
       const condition = () => false;
-      const action = {type: 'foobar'};
-      const whenAction = when(condition, action);
+      const createAction = () => {type: 'foobar'};
+      const whenAction = when(condition, createAction);
 
       expect(whenAction).to.be.deep.equal({
         type: WHEN,
         payload: {
           condition,
-          action
+          createAction
         }
       });
     });
@@ -60,7 +60,7 @@ describe('redux-when', () => {
       const condition = sinon.stub();
       condition.withArgs({}, ACTION_FOO).returns(true);
 
-      store.dispatch(once(condition, ACTION_FOOBAR));
+      store.dispatch(once(condition, () => ACTION_FOOBAR));
       store.dispatch(ACTION_BAR);
       store.dispatch(ACTION_BAR);
 
@@ -76,7 +76,7 @@ describe('redux-when', () => {
       const condition = sinon.stub();
       condition.withArgs({}, ACTION_BAR).returns(true);
 
-      store.dispatch(once(condition, ACTION_FOO));
+      store.dispatch(once(condition, () => ACTION_FOO));
       store.dispatch(ACTION_BAR);
       store.dispatch(ACTION_BAR);
 
@@ -94,7 +94,7 @@ describe('redux-when', () => {
       const condition = sinon.stub();
       condition.withArgs({}, ACTION_FOO).returns(true);
 
-      store.dispatch(when(condition, ACTION_FOOBAR));
+      store.dispatch(when(condition, () => ACTION_FOOBAR));
       store.dispatch(ACTION_BAR);
       store.dispatch(ACTION_BAR);
 
@@ -104,21 +104,18 @@ describe('redux-when', () => {
 
     });
 
-    it('should dispatch a delayed action more than once when using when() and the condition evaluates to true more than once', () => {
+    it('should dispatch a delayed action with a modified action name when using the createAction(action) parameter', () => {
 
       const store = createStore();
       const condition = sinon.stub();
       condition.withArgs({}, ACTION_BAR).returns(true);
 
-      store.dispatch(when(condition, ACTION_FOO));
-      store.dispatch(ACTION_BAR);
+      store.dispatch(when(condition, action => ({type: `__${action.type}__`})));
       store.dispatch(ACTION_BAR);
 
       expect(condition).to.be.called;
       expect(store.getActions()).to.be.deep.equal([
-        ACTION_BAR, ACTION_FOO,
-        ACTION_BAR, ACTION_FOO
-      ]);
+        ACTION_BAR, {type: '__BAR__'}]);
 
     });
 

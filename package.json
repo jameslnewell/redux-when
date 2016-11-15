@@ -1,7 +1,7 @@
 {
   "name": "redux-when",
-  "version": "1.0.0-preview.1",
-  "description": "Delay dispatching an action until a condition is true.",
+  "version": "1.0.0-preview.2",
+  "description": "Redux middleware for delaying dispatch of an action until a condition evaluates to true.",
   "keywords": [
     "redux",
     "wait",

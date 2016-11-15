@@ -2,8 +2,7 @@ import {createStore, applyMiddleware} from 'redux';
 import middleware, {once} from '..';
 
 const reducer = (state = {}, action = {}) => {
-  const {type} = action;
-  switch (type) {
+  switch (action.type) {
 
     case 'SAVE':
       return {...state, saved: true};
@@ -21,7 +20,7 @@ const reducer = (state = {}, action = {}) => {
 const store = createStore(reducer, {}, applyMiddleware(middleware));
 
 //dispatch the `NAVIGATE` action ONCE the state has been saved
-store.dispatch(once(state => state.saved, {type: 'NAVIGATE'}));
+store.dispatch(once(state => state.saved, () => ({type: 'NAVIGATE'})));
 
 //prints: {}
 console.log(store.getState());

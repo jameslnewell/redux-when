@@ -1,6 +1,6 @@
 # redux-when
 
-Redux middleware for delaying dispatch of an action until a condition is true.
+Redux middleware for delaying dispatch of an action until a condition evaluates to true.
 
 > If you're upgrading from `v0.1.0` make sure you read about the  [changes](./CHANGELOG.md) introduced in `v1.0.0`.
 
@@ -15,8 +15,7 @@ import {createStore, applyMiddleware} from 'redux';
 import middleware, {once} from 'redux-when';
 
 const reducer = (state = {}, action = {}) => {
-  const {type} = action;
-  switch (type) {
+  switch (action.type) {
 
     case 'SAVE':
       return {...state, saved: true};
@@ -34,7 +33,7 @@ const reducer = (state = {}, action = {}) => {
 const store = createStore(reducer, {}, applyMiddleware(middleware));
 
 //dispatch the `NAVIGATE` action ONCE the state has been saved
-store.dispatch(once(state => state.saved, {type: 'NAVIGATE'}));
+store.dispatch(once(state => state.saved, () => ({type: 'NAVIGATE'})));
 
 //prints: {}
 console.log(store.getState());
@@ -54,7 +53,7 @@ console.log(store.getState());
 
 The Redux middleware.
 
-### once(condition, action)
+### once(condition, createAction)
 
 Creates an action that will execute ONCE when the `condition` evaluates to true.
 
@@ -62,18 +61,18 @@ Creates an action that will execute ONCE when the `condition` evaluates to true.
 
 - `condition : (state : object, action : object) => boolean` &mdash; Required. The condition that determines when the action is dispatched.
 
-- `action : *` &mdash; Required. The action that will be dispatched when the `condition` evaluates to `true`. Can be any value dispatchable by your store including thunks, promises etc as long as your store is configured with the necessary middleware.
+- `createAction : (action : object) => *` &mdash; Required. The action that will be dispatched when the `condition` evaluates to `true`. Can return any value dispatchable by your store including thunks, promises etc as long as your store is configured with the necessary middleware.
 
 **Returns:**
 
-Returns a dispatchable Redux action to be handled by the `redux-when` middleware.
+Returns a dispatchable Redux action that will be handled by the `redux-when` middleware.
 
 > Note: You MUST dispatch the created action.
   ```js
-  store.dispatch(once(() => true, {type: 'xyz'}));
+  store.dispatch(once(() => true, () => {type: 'xyz'}));
   ```
 
-### when(condition, action)
+### when(condition, createAction)
 
 Creates an action that will execute EVERY time the `condition` evaluates to true.
 
@@ -81,13 +80,13 @@ Creates an action that will execute EVERY time the `condition` evaluates to true
 
 - `condition : (state : object, action : object) => boolean` &mdash; Required. The condition that determines when the action is dispatched.
 
-- `action : *` &mdash; Required. The action that will be dispatched when the `condition` evaluates to `true`. Can be any value dispatchable by your store including thunks, promises etc as long as your store is configured with the necessary middleware.
+- `createAction : (action : object) => *` &mdash; Required. The action that will be dispatched when the `condition` evaluates to `true`. Can return any value dispatchable by your store including thunks, promises etc as long as your store is configured with the necessary middleware.
 
 **Returns:**
 
-Returns a dispatchable Redux action to be handled by the `redux-when` middleware.
+Returns a dispatchable Redux action that will be handled by the `redux-when` middleware.
 
 > Note: You MUST dispatch the created action.
   ```js
-  store.dispatch(when(() => true, {type: 'xyz'}));
+  store.dispatch(when(() => true, () => {type: 'xyz'}));
   ```

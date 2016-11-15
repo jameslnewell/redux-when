@@ -1,22 +1,22 @@
 export const ONCE = '@redux-when/once';
 export const WHEN = '@redux-when/when';
 
-export function once(condition, action) {
+export function once(condition, createAction) {
   return {
     type: ONCE,
     payload: {
       condition,
-      action
+      createAction
     }
   };
 }
 
-export function when(condition, action) {
+export function when(condition, createAction) {
   return {
     type: WHEN,
     payload: {
       condition,
-      action
+      createAction
     }
   };
 }
@@ -51,12 +51,12 @@ export default store => {
           }
 
           //dispatch the delayed action
-          store.dispatch(when.payload.action);
+          store.dispatch(when.payload.createAction(action));
 
         }
 
       });
-      
+
       return result;
     }
 
