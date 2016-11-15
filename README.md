@@ -65,11 +65,11 @@ Creates an action that will execute ONCE when the `condition` evaluates to true.
 
 **Returns:**
 
-Returns a dispatchable Redux action that will be handled by the `redux-when` middleware.
+Returns a dispatchable Redux action that will be handled by the `redux-when` middleware. When dispatched, a `cancel` token will be returned.
 
 > Note: You MUST dispatch the created action.
   ```js
-  store.dispatch(once(() => true, () => {type: 'xyz'}));
+  store.dispatch(once(() => true, () => {type: 'XYZ'}));
   ```
 
 ### when(condition, createAction)
@@ -84,9 +84,42 @@ Creates an action that will execute EVERY time the `condition` evaluates to true
 
 **Returns:**
 
-Returns a dispatchable Redux action that will be handled by the `redux-when` middleware.
+Returns a dispatchable Redux action that will be handled by the `redux-when` middleware. When dispatched, a `cancel` token will be returned.
 
 > Note: You MUST dispatch the created action.
   ```js
-  store.dispatch(when(() => true, () => {type: 'xyz'}));
+  store.dispatch(when(() => true, () => {type: 'XYZ'}));
   ```
+
+### cancel(token)
+
+Cancels a delayed action created by `once()` or `when()`.
+
+**Parameters:**
+
+- `token : *` &mdash; Required. A token returned by `once()` or `when()`.
+
+Returns a dispatchable Redux action that will be handled by the `redux-when` middleware. When dispatched, `null` will be returned.
+
+**Returns:**
+
+> For example:
+
+```js
+import React from 'react';
+import {connect} from 'react-redux';
+
+class Example extends React.Component {
+
+  componentWillMount() {
+    this.token = this.props.dispatch(when(() => true, () => {type: 'XYZ'));
+  }
+
+  componentWillUnmount() {
+    this.token = this.props.dispatch(cancel(this.token));
+  }
+
+}
+
+export default connect()(Example);
+```

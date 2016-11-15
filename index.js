@@ -1,5 +1,6 @@
 export const ONCE = '@redux-when/once';
 export const WHEN = '@redux-when/when';
+export const CANCEL = '@redux-when/cancel';
 
 export function once(condition, createAction) {
   return {
@@ -21,16 +22,39 @@ export function when(condition, createAction) {
   };
 }
 
+export function cancel(token) {
+  return {
+    type: CANCEL,
+    payload: token
+  };
+}
+
 export default store => {
   const waiting = [];
+  let lastToken = 0;
 
   return next => action => {
     const {type} = action;
 
     if (type === ONCE || type === WHEN) {
+      const token = ++lastToken;
+
+      //attach the token
+      action.meta = {token};
 
       //delay the action
       waiting.push(action);
+
+      return token;
+    } else if (type === CANCEL) {
+
+      //if we can find the token, remove it
+      const index = waiting.findIndex(when => when.meta.token === action.payload)
+      if (index !== -1) {
+        waiting.splice(index, 1);
+      }
+
+      return null;
 
     } else {
 

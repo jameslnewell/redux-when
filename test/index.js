@@ -2,7 +2,7 @@ import chai, {expect} from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import configureStore from 'redux-mock-store'
-import middleware, {ONCE, once, WHEN, when} from '..';
+import middleware, {ONCE, once, WHEN, when, CANCEL, cancel} from '..';
 
 chai.use(sinonChai);
 
@@ -54,68 +54,117 @@ describe('redux-when', () => {
 
   describe('middleware()', () => {
 
-    it('should not dispatch delayed action when using once() and the condition evaluates to false', () => {
+    describe('ONCE', () => {
 
-      const store = createStore();
-      const condition = sinon.stub();
-      condition.withArgs({}, ACTION_FOO).returns(true);
+      it('should not dispatch delayed action when the condition evaluates to false', () => {
 
-      store.dispatch(once(condition, () => ACTION_FOOBAR));
-      store.dispatch(ACTION_BAR);
-      store.dispatch(ACTION_BAR);
+        const store = createStore();
+        const condition = sinon.stub();
+        condition.withArgs({}, ACTION_FOO).returns(true);
 
-      expect(store.getActions()).to.be.deep.equal([
-        ACTION_BAR, ACTION_BAR
-      ]);
+        store.dispatch(once(condition, () => ACTION_FOOBAR));
+        store.dispatch(ACTION_BAR);
+        store.dispatch(ACTION_BAR);
 
-    });
+        expect(store.getActions()).to.be.deep.equal([
+          ACTION_BAR, ACTION_BAR
+        ]);
 
-    it('should dispatch delayed action one time when using once() and the condition evaluates to true more than once', () => {
+      });
 
-      const store = createStore();
-      const condition = sinon.stub();
-      condition.withArgs({}, ACTION_BAR).returns(true);
+      it('should dispatch delayed action ONCE when the condition evaluates to true more than once', () => {
 
-      store.dispatch(once(condition, () => ACTION_FOO));
-      store.dispatch(ACTION_BAR);
-      store.dispatch(ACTION_BAR);
+        const store = createStore();
+        const condition = sinon.stub();
+        condition.withArgs({}, ACTION_BAR).returns(true);
 
-      expect(condition).to.be.calledOnce;
-      expect(store.getActions()).to.be.deep.equal([
-        ACTION_BAR, ACTION_FOO,
-        ACTION_BAR
-      ]);
+        store.dispatch(once(condition, () => ACTION_FOO));
+        store.dispatch(ACTION_BAR);
+        store.dispatch(ACTION_BAR);
 
-    });
+        expect(condition).to.be.calledOnce;
+        expect(store.getActions()).to.be.deep.equal([
+          ACTION_BAR, ACTION_FOO,
+          ACTION_BAR
+        ]);
 
-    it('should not dispatch delayed action when using when() and the condition evaluates to false', () => {
-
-      const store = createStore();
-      const condition = sinon.stub();
-      condition.withArgs({}, ACTION_FOO).returns(true);
-
-      store.dispatch(when(condition, () => ACTION_FOOBAR));
-      store.dispatch(ACTION_BAR);
-      store.dispatch(ACTION_BAR);
-
-      expect(store.getActions()).to.be.deep.equal([
-        ACTION_BAR, ACTION_BAR
-      ]);
+      });
 
     });
 
-    it('should dispatch a delayed action with a modified action name when using the createAction(action) parameter', () => {
+    describe('WHEN', () => {
 
-      const store = createStore();
-      const condition = sinon.stub();
-      condition.withArgs({}, ACTION_BAR).returns(true);
+      it('should not dispatch delayed action when the condition evaluates to false', () => {
 
-      store.dispatch(when(condition, action => ({type: `__${action.type}__`})));
-      store.dispatch(ACTION_BAR);
+        const store = createStore();
+        const condition = sinon.stub();
+        condition.withArgs({}, ACTION_FOO).returns(true);
 
-      expect(condition).to.be.called;
-      expect(store.getActions()).to.be.deep.equal([
-        ACTION_BAR, {type: '__BAR__'}]);
+        store.dispatch(when(condition, () => ACTION_FOOBAR));
+        store.dispatch(ACTION_BAR);
+        store.dispatch(ACTION_BAR);
+
+        expect(store.getActions()).to.be.deep.equal([
+          ACTION_BAR, ACTION_BAR
+        ]);
+
+      });
+
+      it('should dispatch a delayed action more than once when the condition evaluates to true more than once', () => {
+
+        const store = createStore();
+        const condition = sinon.stub();
+        condition.withArgs({}, ACTION_BAR).returns(true);
+
+        store.dispatch(when(condition, () => ACTION_FOO));
+        store.dispatch(ACTION_BAR);
+        store.dispatch(ACTION_BAR);
+
+        expect(condition).to.be.called;
+        expect(store.getActions()).to.be.deep.equal([
+          ACTION_BAR, ACTION_FOO,
+          ACTION_BAR, ACTION_FOO
+        ]);
+
+      });
+
+      it('should dispatch a delayed action with a modified action name when using the createAction(action) parameter', () => {
+
+        const store = createStore();
+        const condition = sinon.stub();
+        condition.withArgs({}, ACTION_BAR).returns(true);
+
+        store.dispatch(when(condition, action => ({type: `__${action.type}__`})));
+        store.dispatch(ACTION_BAR);
+
+        expect(condition).to.be.called;
+        expect(store.getActions()).to.be.deep.equal([
+          ACTION_BAR, {type: '__BAR__'}
+        ]);
+
+      });
+
+    });
+
+    describe('CANCEL', () => {
+
+      it('should not dispatch a delayed action when it has been cancelled', () => {
+
+        const store = createStore();
+        const condition = sinon.stub();
+        condition.withArgs({}, ACTION_BAR).returns(true);
+
+        let token;
+        token = store.dispatch(when(condition, () => ACTION_FOO));
+        token = store.dispatch(cancel(token));
+        store.dispatch(ACTION_BAR);
+
+        expect(condition).to.not.be.called;
+        expect(store.getActions()).to.be.deep.equal([
+          ACTION_BAR
+        ]);
+
+      });
 
     });
 
