@@ -61,7 +61,7 @@ Creates an action that will execute ONCE when the `condition` evaluates to true.
 
 - `condition : (state : object, action : object) => boolean` &mdash; Required. The condition that determines when the action is dispatched.
 
-- `createAction : (action : object) => *` &mdash; Required. Create the action that will be dispatched when the `condition` evaluates to `true`. Can return any value dispatchable by your store including thunks, promises etc as long as your store is configured with the necessary middleware.
+- `createAction : (action : object) => *` &mdash; Required. A function creating the action that will be dispatched when the `condition` evaluates to `true`. Can return any value dispatchable by your store including thunks, promises etc as long as your store is configured with the necessary middleware.
 
 **Returns:**
 
@@ -80,7 +80,7 @@ Creates an action that will execute EVERY time the `condition` evaluates to true
 
 - `condition : (state : object, action : object) => boolean` &mdash; Required. The condition that determines when the action is dispatched.
 
-- `createAction : (action : object) => *` &mdash; Required. Create the action that will be dispatched when the `condition` evaluates to `true`. Can return any value dispatchable by your store including thunks, promises etc as long as your store is configured with the necessary middleware.
+- `createAction : (action : object) => *` &mdash; Required. A function creating the action that will be dispatched when the `condition` evaluates to `true`. Can return any value dispatchable by your store including thunks, promises etc as long as your store is configured with the necessary middleware.
 
 **Returns:**
 
