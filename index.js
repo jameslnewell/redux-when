@@ -49,7 +49,7 @@ export default store => {
     } else if (type === CANCEL) {
 
       //if we can find the token, remove it
-      const index = waiting.findIndex(when => when.meta.token === action.payload)
+      const index = waiting.findIndex(when => when.meta.token === action.payload);
       if (index !== -1) {
         waiting.splice(index, 1);
       }

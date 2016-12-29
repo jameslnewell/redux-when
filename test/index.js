@@ -154,9 +154,8 @@ describe('redux-when', () => {
         const condition = sinon.stub();
         condition.withArgs({}, ACTION_BAR).returns(true);
 
-        let token;
-        token = store.dispatch(when(condition, () => ACTION_FOO));
-        token = store.dispatch(cancel(token));
+        const token = store.dispatch(when(condition, () => ACTION_FOO));
+        store.dispatch(cancel(token));
         store.dispatch(ACTION_BAR);
 
         expect(condition).to.not.be.called;
