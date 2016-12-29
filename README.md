@@ -6,11 +6,11 @@ Redux middleware for delaying dispatch of an action until a condition evaluates 
 
 ##### Why
 
-Usually, using promises you can use chain asynchronous actions:
+Usually, you can use promises to chain asynchronous actions:
 
 ```js
 /*
- Save the form and then navigate somewhere when the user submits the form
+ Save the form and navigate somewhere
  */
 const handleFormSubmit = () => {
   Promise.resolve()
@@ -20,12 +20,12 @@ const handleFormSubmit = () => {
 }
 ```
 
-But sometimes an asynchronous actions may have already been dispatched and you don't have a promise to chain. `redux-when` provides a solution to this problem:
+But sometimes asynchronous actions have already been dispatched and you don't have a promise to chain on. `redux-when` provides a solution to this problem:
 
 ```js
 
 /*
-Save the form whenever the user leaves a field
+ Save the form
  */
 const handleFieldBlur = () => {
   store.dispatch(save(data))
@@ -33,7 +33,7 @@ const handleFieldBlur = () => {
 
 
 /*
- Wait for any queued saves to finish and then navigate somewhere when the user submits the form
+ Wait for any queued saves to finish and then navigate somewhere
  */
 const handleFormSubmit = () => {
   store.dispatch(once(state => state.saved, navigate()));
