@@ -1,102 +1,172 @@
+import chai, {expect} from 'chai';
 import sinon from 'sinon';
-import {expect} from 'chai';
-import enhancer, {WHEN, when} from '..';
+import sinonChai from 'sinon-chai';
+import configureStore from 'redux-mock-store'
+import middleware, {ONCE, once, WHEN, when, CANCEL, cancel} from '..';
 
-const noop = () => {/* do nothing */};
+chai.use(sinonChai);
+
+const ACTION_FOO = {type: 'FOO'};
+const ACTION_BAR = {type: 'BAR'};
+const ACTION_FOOBAR = {type: 'FOOBAR'};
+
+const createStore = configureStore([middleware]);
 
 describe('redux-when', () => {
 
-  describe('when()', () => {
+  describe('once()', () => {
 
-    it('should create a when() action', () => {
+    it('should create a once() action', () => {
 
       const condition = () => false;
-      const action = {type: 'foobar'};
-      const whenAction = when(condition, action);
+      const createAction = () => {type: 'foobar'};
+      const onceAction = once(condition, createAction);
 
-      expect(whenAction).to.be.deep.equal({
-        type: WHEN,
+      expect(onceAction).to.be.deep.equal({
+        type: ONCE,
         payload: {
           condition,
-          action
+          createAction
         }
       });
     });
 
   });
 
-  it('should return a function for creating an enhanced store', () => {
-    const createStore = sinon.stub().returns({});
-    expect(enhancer(createStore)).to.be.a('function');
+  describe('when()', () => {
+
+    it('should create a when() action', () => {
+
+      const condition = () => false;
+      const createAction = () => {type: 'foobar'};
+      const whenAction = when(condition, createAction);
+
+      expect(whenAction).to.be.deep.equal({
+        type: WHEN,
+        payload: {
+          condition,
+          createAction
+        }
+      });
+    });
+
   });
 
-  it('should call the original function when creating an enhanced store', () => {
-    const createStore = sinon.stub().returns({subscribe: sinon.spy()});
+  describe('middleware()', () => {
 
-    enhancer(createStore)();
+    describe('ONCE', () => {
 
-    expect(createStore.calledOnce).to.be.true;
-  });
+      it('should not dispatch delayed action when the condition evaluates to false', () => {
 
-  it('should subscribe() to the original store when creating an enhanced store', () => {
-    const subscribe = sinon.spy();
-    const createStore = sinon.stub().returns({subscribe});
+        const store = createStore();
+        const condition = sinon.stub();
+        condition.withArgs({}, ACTION_FOO).returns(true);
 
-    enhancer(createStore)();
+        store.dispatch(once(condition, () => ACTION_FOOBAR));
+        store.dispatch(ACTION_BAR);
+        store.dispatch(ACTION_BAR);
 
-    expect(subscribe.calledOnce).to.be.true;
-  });
+        expect(store.getActions()).to.be.deep.equal([
+          ACTION_BAR, ACTION_BAR
+        ]);
 
-  it('should call dispatch() on the original store for actions which are not intended to be delayed', () => {
-    const subscribe = sinon.spy();
-    const dispatch = sinon.spy();
-    const createStore = sinon.stub().returns({subscribe, dispatch});
-    const enhancedStore = enhancer(createStore)();
+      });
 
-    enhancedStore.dispatch({type: 'foobar'});
+      it('should dispatch delayed action ONCE when the condition evaluates to true more than once', () => {
 
-    expect(dispatch.calledOnce).to.be.true;
-    expect(dispatch.calledWith({type: 'foobar'})).to.be.true;
-  });
+        const store = createStore();
+        const condition = sinon.stub();
+        condition.withArgs({}, ACTION_BAR).returns(true);
 
-  it('should not call dispatch() on the original store for actions which are intended to be delayed', () => {
-    const subscribe = sinon.spy();
-    const dispatch = sinon.spy();
-    const createStore = sinon.stub().returns({subscribe, dispatch});
-    const enhancedStore = enhancer(createStore)();
+        store.dispatch(once(condition, () => ACTION_FOO));
+        store.dispatch(ACTION_BAR);
+        store.dispatch(ACTION_BAR);
 
-    enhancedStore.dispatch(when(null, null));
+        expect(condition).to.be.calledOnce;
+        expect(store.getActions()).to.be.deep.equal([
+          ACTION_BAR, ACTION_FOO,
+          ACTION_BAR
+        ]);
 
-    expect(dispatch.calledOnce).to.be.false;
-  });
+      });
 
-  it('should call dispatch() once, with the action when the state changes and the condition() is true', () => {
-    const subscribe = sinon.spy();
-    const dispatch = sinon.spy();
-    const getState = sinon.stub().returns({});
-    const createStore = sinon.stub().returns({subscribe, dispatch, getState});
-    const enhancedStore = enhancer(createStore)();
+    });
 
-    enhancedStore.dispatch(when(() => true, {type: 'foobar'}));
-    subscribe.args[0][0]();
-    subscribe.args[0][0]();
+    describe('WHEN', () => {
 
-    expect(dispatch.calledOnce).to.be.true;
-    expect(dispatch.calledWith({type: 'foobar'})).to.be.true;
-  });
+      it('should not dispatch delayed action when the condition evaluates to false', () => {
 
-  it('should not call dispatch() when the state changes and the condition() is false', () => {
-    const subscribe = sinon.spy();
-    const dispatch = sinon.spy();
-    const getState = sinon.stub().returns({});
-    const createStore = sinon.stub().returns({subscribe, dispatch, getState});
-    const enhancedStore = enhancer(createStore)();
+        const store = createStore();
+        const condition = sinon.stub();
+        condition.withArgs({}, ACTION_FOO).returns(true);
 
-    enhancedStore.dispatch(when(() => false, {type: 'foobar'}));
-    subscribe.args[0][0]();
-    subscribe.args[0][0]();
+        store.dispatch(when(condition, () => ACTION_FOOBAR));
+        store.dispatch(ACTION_BAR);
+        store.dispatch(ACTION_BAR);
 
-    expect(dispatch.notCalled).to.be.true;
+        expect(store.getActions()).to.be.deep.equal([
+          ACTION_BAR, ACTION_BAR
+        ]);
+
+      });
+
+      it('should dispatch a delayed action more than once when the condition evaluates to true more than once', () => {
+
+        const store = createStore();
+        const condition = sinon.stub();
+        condition.withArgs({}, ACTION_BAR).returns(true);
+
+        store.dispatch(when(condition, () => ACTION_FOO));
+        store.dispatch(ACTION_BAR);
+        store.dispatch(ACTION_BAR);
+
+        expect(condition).to.be.called;
+        expect(store.getActions()).to.be.deep.equal([
+          ACTION_BAR, ACTION_FOO,
+          ACTION_BAR, ACTION_FOO
+        ]);
+
+      });
+
+      it('should dispatch a delayed action with a modified action name when using the createAction(action) parameter', () => {
+
+        const store = createStore();
+        const condition = sinon.stub();
+        condition.withArgs({}, ACTION_BAR).returns(true);
+
+        store.dispatch(when(condition, action => ({type: `__${action.type}__`})));
+        store.dispatch(ACTION_BAR);
+
+        expect(condition).to.be.called;
+        expect(store.getActions()).to.be.deep.equal([
+          ACTION_BAR, {type: '__BAR__'}
+        ]);
+
+      });
+
+    });
+
+    describe('CANCEL', () => {
+
+      it('should not dispatch a delayed action when it has been cancelled', () => {
+
+        const store = createStore();
+        const condition = sinon.stub();
+        condition.withArgs({}, ACTION_BAR).returns(true);
+
+        const token = store.dispatch(when(condition, () => ACTION_FOO));
+        store.dispatch(cancel(token));
+        store.dispatch(ACTION_BAR);
+
+        expect(condition).to.not.be.called;
+        expect(store.getActions()).to.be.deep.equal([
+          ACTION_BAR
+        ]);
+
+      });
+
+    });
+
   });
 
 });

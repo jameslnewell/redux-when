@@ -1,43 +1,88 @@
-export const WHEN = '@when';
+export const ONCE = '@redux-when/once';
+export const WHEN = '@redux-when/when';
+export const CANCEL = '@redux-when/cancel';
 
-export function when(condition, action) {
+export function once(condition, createAction) {
   return {
-    type: WHEN,
+    type: ONCE,
     payload: {
       condition,
-      action
+      createAction
     }
   };
 }
 
-export default function(createStore) {
-  return (reducer, initialState, enhancer) => {
-    const waiting = [];
-    const store = createStore(reducer, initialState, enhancer);
+export function when(condition, createAction) {
+  return {
+    type: WHEN,
+    payload: {
+      condition,
+      createAction
+    }
+  };
+}
 
-    store.subscribe(() => {
+export function cancel(token) {
+  return {
+    type: CANCEL,
+    payload: token
+  };
+}
+
+export default store => {
+  const waiting = [];
+  let lastToken = 0;
+
+  return next => action => {
+    const {type} = action;
+
+    if (type === ONCE || type === WHEN) {
+      const token = ++lastToken;
+
+      //attach the token
+      action.meta = {token};
+
+      //delay the action
+      waiting.push(action);
+
+      return token;
+    } else if (type === CANCEL) {
+
+      //if we can find the token, remove it
+      const index = waiting.findIndex(when => when.meta.token === action.payload);
+      if (index !== -1) {
+        waiting.splice(index, 1);
+      }
+
+      return null;
+
+    } else {
+
+      //finish displatching the action
+      const result = next(action);
+
+      //get the updated state
+      const state = store.getState();
+
       waiting.forEach((when, index) => {
-        const {payload: {condition, action}} = when;
 
-        if (condition(store.getState())) {
-          waiting.splice(index, 1);
-          store.dispatch(action);
+        //check if the condition is met
+        if (when.payload.condition(state, action)) {
+
+          //remove the delayed action
+          if (when.type === ONCE) {
+            waiting.splice(index, 1);
+          }
+
+          //dispatch the delayed action
+          store.dispatch(when.payload.createAction(action));
+
         }
 
       });
-    });
 
-    return {
-      ...store,
-      dispatch: (action) => {
-        const {type} = action;
-        if (type === WHEN) {
-          waiting.push(action);
-        } else {
-          return store.dispatch(action);
-        }
-      }
-    };
+      return result;
+    }
 
-  };
-}
+  }
+};
