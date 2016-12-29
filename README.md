@@ -4,6 +4,43 @@ Redux middleware for delaying dispatch of an action until a condition evaluates 
 
 > If you're upgrading from `v0.1.x` make sure you read about the  [changes](./CHANGELOG.md) introduced in `v1.0.0`.
 
+##### Why
+
+Usually, using promises you can use chain asynchronous actions:
+
+```js
+/*
+ Save the form and then navigate somewhere when the user submits the form
+ */
+const handleFormSubmit = () => {
+  Promise.resolve()
+    .then(() => store.dispatch(save(data)))
+    .then(() => store.dispatch(navigate()))
+  ;
+}
+```
+
+But sometimes an asynchronous actions may have already been dispatched and you don't have a promise to chain. `redux-when` provides a solution to this problem:
+
+```js
+
+/*
+Save the form whenever the user leaves a field
+ */
+const handleFieldBlur = () => {
+  store.dispatch(save(data))
+};
+
+
+/*
+ Wait for any queued saves to finish and then navigate somewhere when the user submits the form
+ */
+const handleFormSubmit = () => {
+  store.dispatch(once(state => state.saved, navigate()));
+}
+
+```
+
 ## Installation
 
     npm install --save redux-when

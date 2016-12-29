@@ -45,6 +45,9 @@ export default store => {
       //delay the action
       waiting.push(action);
 
+      //TODO: should we evaluate the waiting actions when they're registered instead of waiting for another action to dispatch???
+      //that way if the state is already in that condition it'll fire right away
+
       return token;
     } else if (type === CANCEL) {
 
