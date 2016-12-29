@@ -20,7 +20,7 @@ export default function(createStore) {
         const {payload: {condition, action}} = when;
 
         if (condition(store.getState())) {
-          waiting.splice(index);
+          waiting.splice(index, 1);
           store.dispatch(action);
         }
 

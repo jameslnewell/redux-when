@@ -1,6 +1,6 @@
 {
   "name": "redux-when",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Delay dispatching an action until a condition is true.",
   "keywords": [
     "redux",
