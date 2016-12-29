@@ -20,7 +20,7 @@ const handleFormSubmit = () => {
 }
 ```
 
-But sometimes asynchronous actions have already been dispatched and you don't have a promise to chain on. `redux-when` provides a solution to this problem:
+But sometimes asynchronous actions have already been dispatched and you don't have a promise to chain on. `redux-when` was created to solve this problem:
 
 ```js
 
