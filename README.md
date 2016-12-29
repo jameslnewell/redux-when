@@ -6,7 +6,7 @@ Redux middleware for delaying dispatch of an action until a condition evaluates 
 
 ##### Why
 
-Usually, you can use promises to chain asynchronous actions:
+Usually, you use promises to chain asynchronous actions:
 
 ```js
 /*
@@ -31,9 +31,8 @@ const handleFieldBlur = () => {
   store.dispatch(save(data))
 };
 
-
 /*
- Wait for any queued saves to finish and then navigate somewhere
+ Wait for any save actions to finish and then navigate somewhere
  */
 const handleFormSubmit = () => {
   store.dispatch(once(state => state.saved, navigate()));
