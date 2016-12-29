@@ -2,7 +2,7 @@
 
 Redux middleware for delaying dispatch of an action until a condition evaluates to true.
 
-> If you're upgrading from `v0.1.0` make sure you read about the  [changes](./CHANGELOG.md) introduced in `v1.0.0`.
+> If you're upgrading from `v0.1.x` make sure you read about the  [changes](./CHANGELOG.md) introduced in `v1.0.0`.
 
 ## Installation
 
@@ -67,7 +67,7 @@ Creates an action that will execute ONCE when the `condition` evaluates to true.
 
 Returns a dispatchable Redux action that will be handled by the `redux-when` middleware. When dispatched, a `cancel` token will be returned.
 
-> Note: You MUST dispatch the created action.
+> Note: You MUST dispatch the action created by `once()` otherwise nothing will happen.
   ```js
   store.dispatch(once(() => true, () => {type: 'XYZ'}));
   ```
@@ -86,7 +86,7 @@ Creates an action that will execute EVERY time the `condition` evaluates to true
 
 Returns a dispatchable Redux action that will be handled by the `redux-when` middleware. When dispatched, a `cancel` token will be returned.
 
-> Note: You MUST dispatch the created action.
+> Note: You MUST dispatch the action created by `when()` otherwise nothing will happen.
   ```js
   store.dispatch(when(() => true, () => {type: 'XYZ'}));
   ```
@@ -99,11 +99,11 @@ Cancels a delayed action created by `once()` or `when()`.
 
 - `token : *` &mdash; Required. A token returned by `once()` or `when()`.
 
-Returns a dispatchable Redux action that will be handled by the `redux-when` middleware. When dispatched, `null` will be returned.
-
 **Returns:**
 
-> For example:
+Returns a dispatchable Redux action that will be handled by the `redux-when` middleware. When dispatched, `null` will be returned.
+
+> Note: You MUST dispatch the action created by `cancel()` otherwise nothing will happen.
 
 ```js
 import React from 'react';
