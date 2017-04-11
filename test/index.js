@@ -2,7 +2,7 @@ import chai, {expect} from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import configureStore from 'redux-mock-store'
-import middleware, {ONCE, once, WHEN, when, CANCEL, cancel} from '..';
+import middleware, {ONCE, once, WHEN, when, CANCEL, cancel} from '../index';
 
 chai.use(sinonChai);
 
@@ -56,6 +56,20 @@ describe('redux-when', () => {
 
     describe('ONCE', () => {
 
+      it('should immediately evaluate and dispatch action ONCE when evaluated as true', () => {
+          const store = createStore();
+          const condition = sinon.stub();
+          condition.returns(true);
+          const actionCreator = sinon.stub().returns(ACTION_FOO);
+
+          store.dispatch(once(condition, actionCreator));
+
+          expect(actionCreator).to.be.calledOnce;
+          expect(store.getActions()).to.be.deep.equal([
+              ACTION_FOO
+          ]);
+      });
+
       it('should not dispatch delayed action when the condition evaluates to false', () => {
 
         const store = createStore();
@@ -77,12 +91,13 @@ describe('redux-when', () => {
         const store = createStore();
         const condition = sinon.stub();
         condition.withArgs({}, ACTION_BAR).returns(true);
+        const actionCreator = sinon.stub().returns(ACTION_FOO);
 
-        store.dispatch(once(condition, () => ACTION_FOO));
+        store.dispatch(once(condition, actionCreator));
         store.dispatch(ACTION_BAR);
         store.dispatch(ACTION_BAR);
 
-        expect(condition).to.be.calledOnce;
+        expect(actionCreator).to.be.calledOnce;
         expect(store.getActions()).to.be.deep.equal([
           ACTION_BAR, ACTION_FOO,
           ACTION_BAR
@@ -153,12 +168,13 @@ describe('redux-when', () => {
         const store = createStore();
         const condition = sinon.stub();
         condition.withArgs({}, ACTION_BAR).returns(true);
+        const actionCreator = sinon.stub().returns(ACTION_FOO);
 
-        const token = store.dispatch(when(condition, () => ACTION_FOO));
+        const token = store.dispatch(when(condition, actionCreator));
         store.dispatch(cancel(token));
         store.dispatch(ACTION_BAR);
 
-        expect(condition).to.not.be.called;
+        expect(actionCreator).to.not.be.called;
         expect(store.getActions()).to.be.deep.equal([
           ACTION_BAR
         ]);

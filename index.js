@@ -30,13 +30,19 @@ export function cancel(token) {
 }
 
 export default store => {
-  const waiting = [];
+  let waiting = [];
   let lastToken = 0;
 
   return next => action => {
-    const {type} = action;
+    const {type, payload} = action;
 
     if (type === ONCE || type === WHEN) {
+      const state = store.getState();
+      if (payload.condition(state, action)) {
+          next(payload.createAction(action));
+          if(type === ONCE) return;
+      }
+
       const token = ++lastToken;
 
       //attach the token
@@ -44,9 +50,6 @@ export default store => {
 
       //delay the action
       waiting.push(action);
-
-      //TODO: should we evaluate the waiting actions when they're registered instead of waiting for another action to dispatch???
-      //that way if the state is already in that condition it'll fire right away
 
       return token;
     } else if (type === CANCEL) {
@@ -61,28 +64,20 @@ export default store => {
 
     } else {
 
-      //finish displatching the action
+      //finish dispatching the action
       const result = next(action);
 
       //get the updated state
       const state = store.getState();
 
-      waiting.forEach((when, index) => {
+      const readyToBeDispatched = waiting
+          .filter(when => when.payload.condition(state, action));
 
-        //check if the condition is met
-        if (when.payload.condition(state, action)) {
+      readyToBeDispatched
+          .forEach(when => next(when.payload.createAction(action)));
 
-          //remove the delayed action
-          if (when.type === ONCE) {
-            waiting.splice(index, 1);
-          }
-
-          //dispatch the delayed action
-          store.dispatch(when.payload.createAction(action));
-
-        }
-
-      });
+      waiting = waiting
+          .filter(when => when.payload.condition(state, action) && when.type !== ONCE);
 
       return result;
     }
