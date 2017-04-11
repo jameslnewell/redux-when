@@ -2,7 +2,7 @@ import chai, {expect} from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import configureStore from 'redux-mock-store'
-import middleware, {ONCE, once, WHEN, when, CANCEL, cancel} from '../index';
+import middleware, {ONCE, once, WHEN, when, CANCEL, cancel} from '..';
 
 chai.use(sinonChai);
 

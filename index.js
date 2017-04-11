@@ -30,17 +30,21 @@ export function cancel(token) {
 }
 
 export default store => {
-  let waiting = [];
+  const waiting = [];
   let lastToken = 0;
 
   return next => action => {
     const {type, payload} = action;
 
     if (type === ONCE || type === WHEN) {
+
+      //dispatch the action immediately if the condition is met
       const state = store.getState();
       if (payload.condition(state, action)) {
           next(payload.createAction(action));
-          if(type === ONCE) return;
+          if (type === ONCE) {
+            return null;
+          }
       }
 
       const token = ++lastToken;
@@ -52,6 +56,7 @@ export default store => {
       waiting.push(action);
 
       return token;
+
     } else if (type === CANCEL) {
 
       //if we can find the token, remove it
@@ -70,15 +75,23 @@ export default store => {
       //get the updated state
       const state = store.getState();
 
-      const readyToBeDispatched = waiting
-          .filter(when => when.payload.condition(state, action));
+      waiting.forEach((when, index) => {
 
-      readyToBeDispatched
-          .forEach(when => next(when.payload.createAction(action)));
+        //check if the condition is met
+        if (when.payload.condition(state, action)) {
 
-      waiting = waiting
-          .filter(when => when.payload.condition(state, action) && when.type !== ONCE);
+          //remove the delayed action
+          if (when.type === ONCE) {
+            waiting.splice(index, 1);
+          }
 
+          //dispatch the delayed action
+          store.dispatch(when.payload.createAction(action));
+
+        }
+
+      });
+      
       return result;
     }
 
