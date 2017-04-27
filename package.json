@@ -12,6 +12,7 @@
     "once"
   ],
   "main": "./dist/index.js",
+  "types": "./index.d.ts",
   "repository": "jameslnewell/redux-when",
   "devDependencies": {
     "babel-cli": "^6.6.0",
