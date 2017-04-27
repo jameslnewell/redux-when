@@ -159,3 +159,9 @@ class Example extends React.Component {
 
 export default connect()(Example);
 ```
+
+## Change log
+
+### 2.1.0
+
+- added Typescript types
