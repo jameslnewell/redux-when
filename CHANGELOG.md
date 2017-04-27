@@ -1,6 +1,14 @@
 
 # Change log
 
+## 2.1.1
+
+- fix: moved change log to change log
+
+## 2.1.0
+
+- added Typescript types
+
 ## 1.0.1-2
 
 - fix: updated documentation
