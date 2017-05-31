@@ -1,6 +1,6 @@
 {
   "name": "redux-when",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Redux middleware for delaying dispatch of an action until a condition evaluates to true.",
   "keywords": [
     "redux",
@@ -29,6 +29,7 @@
     "build": "babel ./index.js -d ./dist/",
     "watch": "npm run build -- --watch",
     "test": "mocha --compilers js:babel-register",
-    "example": "babel-node ./example/index.js"
+    "example": "babel-node ./example/index.js",
+    "prepublish": "npm run build"
   }
 }
