@@ -82,7 +82,7 @@ export default store => {
 
           //remove the delayed action
           if (when.type === ONCE) {
-            waiting.splice(index, 1);
+            delete waiting[index];
           }
 
           //dispatch the delayed action
