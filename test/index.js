@@ -69,7 +69,7 @@ describe('redux-when', () => {
               ACTION_FOO
           ]);
       });
-
+      
       it('should not dispatch delayed action when the condition evaluates to false', () => {
 
         const store = createStore();
@@ -104,6 +104,29 @@ describe('redux-when', () => {
         ]);
 
       });
+      
+      it('should dispatch several delayed actions ONCE when evaluated as true', () => {
+          const store = createStore();
+          const condition = sinon.stub();
+          condition.withArgs({}, ACTION_FOOBAR).returns(true);
+          const actionCreator1 = sinon.stub().returns(ACTION_FOO);
+          const actionCreator2 = sinon.stub().returns(ACTION_BAR);
+
+          store.dispatch(once(condition, actionCreator1));
+          store.dispatch(once(condition, actionCreator2));
+          store.dispatch(ACTION_FOOBAR);
+          store.dispatch(ACTION_FOOBAR);
+
+          expect(actionCreator1).to.be.calledOnce;
+          expect(actionCreator2).to.be.calledOnce;
+          expect(store.getActions()).to.be.deep.equal([
+              ACTION_FOOBAR,
+              ACTION_FOO,
+              ACTION_BAR,
+              ACTION_FOOBAR
+          ]);
+      });
+
 
     });
 
