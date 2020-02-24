@@ -2,8 +2,6 @@
 
 Redux middleware for delaying dispatch of an action until a condition evaluates to true.
 
-> If you're upgrading from `v0.1.x` make sure you read about the  [changes](./CHANGELOG.md) introduced in `v1.0.0`.
-
 ##### Why
 
 Usually, you use promises to chain asynchronous actions:
