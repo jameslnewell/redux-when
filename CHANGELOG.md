@@ -1,6 +1,10 @@
 
 # Change log
 
+## 2.1.3
+
+- fix: ensure all delayed actions which match the condition are dispatched (https://github.com/jameslnewell/redux-when/issues/7)
+
 ## 2.1.1
 
 - fix: moved change log to change log

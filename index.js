@@ -62,7 +62,7 @@ export default store => {
       //if we can find the token, remove it
       const index = waiting.findIndex(when => when.meta.token === action.payload);
       if (index !== -1) {
-        waiting.splice(index, 1);
+        waiting.splice(index, 1);      
       }
 
       return null;
@@ -75,14 +75,20 @@ export default store => {
       //get the updated state
       const state = store.getState();
 
-      waiting.forEach((when, index) => {
+      // dispatch items in order
+      let length = waiting.length;
+      for (let index=0; index<length; ++index) {
+        const when = waiting[index];
 
         //check if the condition is met
         if (when.payload.condition(state, action)) {
-
+          
           //remove the delayed action
           if (when.type === ONCE) {
             waiting.splice(index, 1);
+            // adjust index and length to cater for deleted items
+            index = index - 1;
+            length = length - 1;
           }
 
           //dispatch the delayed action
@@ -90,7 +96,7 @@ export default store => {
 
         }
 
-      });
+      }
       
       return result;
     }
